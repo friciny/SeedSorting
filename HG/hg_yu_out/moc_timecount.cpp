@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'timecount.h'
 **
-** Created: Mon Nov 2 16:27:02 2015
+** Created: Mon Dec 28 10:29:47 2015
 **      by: The Qt Meta Object Compiler version 61 (Qt 4.5.2)
 **
 ** WARNING! All changes made in this file will be lost!

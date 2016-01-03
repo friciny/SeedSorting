@@ -23,7 +23,7 @@ void Actor::run()
     {
         syncmutex.lock();
         checkTemp();
-        qDebug()<<"state = "<<rtcmd.state;
+        checkHumi();
         resolvecmd(rtcmd);
         syncmutex.unlock();
 
@@ -156,16 +156,21 @@ void Actor::resolvecmd(const RealtimeCmd &cmd)
 {
     switch (cmd.state)
     {
-    case 1:
+    case 0:
         writeActorCmd(FEEDING);
+        break;
+    case 1:
+        writeActorCmd(FEEDED);
         break;
     case 2:
         writeActorCmd(CIRCULATING);
         setTempLimit(cmd.temp_limit_high,cmd.temp_limit_low);
         break;
     case 3:
-        if((rtdata.temphigh>=rtcmd.temp_limit_high)
-                &&(rtdata.templow>=rtcmd.temp_limit_low))
+        if(((rtdata.temphigh>=rtcmd.temp_limit_high)
+            &&(rtdata.templow>=rtcmd.temp_limit_low))
+                ||((rtdata.humihigh<=rtcmd.humi_limit_high)
+                   &&(rtdata.humilow<=rtcmd.humi_limit_low)))
         {
             writeTempCmd(TEMPCTRL_2);
         }
@@ -178,12 +183,11 @@ void Actor::resolvecmd(const RealtimeCmd &cmd)
     case 4:
         writeTempCmd(TEMPCTRL_2);
         break;
-    case 0:
+    case 5:
         writeTempCmd(TEMPCTRL_3);
         writeActorCmd(ACTORSTOP);
         break;
     }
-
 }
 
 RealtimeData Actor::resolvedata(QByteArray &buff)
@@ -192,8 +196,8 @@ RealtimeData Actor::resolvedata(QByteArray &buff)
     char *pointer;
     quint8 addr;
     quint8 cmd_id;
-    quint8 temp_array[6];
-    quint16 temp_avg;
+    quint8 data_array[6];
+    quint16 data_avg;
 
     data = rtdata; //must to do
 
@@ -207,15 +211,31 @@ RealtimeData Actor::resolvedata(QByteArray &buff)
     {
         for(int i=0;i<6;i++)
         {
-            temp_array[i] = *(pointer+i+1);
+            data_array[i] = *(pointer+i+1);
         }
-        temp_avg=(256*(temp_array[1]+temp_array[3]+temp_array[5])
-                   +temp_array[0]+temp_array[2]+temp_array[4])/3;
+        data_avg=(256*(data_array[1]+data_array[3]+data_array[5])
+                   +data_array[0]+data_array[2]+data_array[4])/3;
 
-        data.templow = temp_avg&0x00ff;
-        data.temphigh = (temp_avg&0xff00)>>8;
+        data.templow = data_avg&0x00ff;
+        data.temphigh = (data_avg&0xff00)>>8;
     }
-
+    else if((addr == HUMI_BORD_ADDR)&&(cmd_id == 0x25))
+    {
+        quint16 temp;
+        temp=256*data.temphigh+data.templow;
+//        temp = (*pointer)*256+(*(pointer+1));
+        data_array[0] = *(pointer+2);
+        data_array[1] = *(pointer+3);
+        data_array[2] = *pointer;
+        data_array[3] = *(pointer+1);
+        qDebug()<<"temp_read = "<<data_array[2]<<" ,"<<data_array[3] ;
+//        data_avg=(256*data_array[1]+data_array[0])/25.6;
+        if(data_array[1]<4.2)
+            data_array[1]=4.2;
+        data_avg=2.1*(256*data_array[1]+data_array[0]-4.2*256)/25.6-(temp-100)/50;
+        data.humilow = data_avg&0x00ff;
+        data.humihigh =  (data_avg&0xff00)>>8;
+    }
 
     return data;
 

@@ -34,7 +34,7 @@ void Inverter::run()
         }
         else
         {
-            this->stop();
+           // this->stop();
             getInverterFreq();
             readInverterData();
             setInverterFreq();
@@ -106,7 +106,7 @@ void Inverter::writeInverterCmd(quint8 PZD1_high ,quint8 PZD1_low,quint8 PZD2_hi
     qDebug() << "writeInverterCMD is " << writeBuff.toHex();
 
     writeBuff.clear();
-    this->msleep(50);
+    this->msleep(100);
 
 }
 

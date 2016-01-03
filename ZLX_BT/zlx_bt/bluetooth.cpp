@@ -53,8 +53,8 @@ void Bluetooth::writeBluetoothData()
 {
     writeBuff.resize(2);
 
-    writeBuff[0] = (uchar)rtcmd.wind_freq;
-    writeBuff[1] = (uchar)rtcmd.shake_freq;
+    writeBuff[0] = (uchar)rtdata.wind_freq;
+    writeBuff[1] = (uchar)rtdata.shake_freq;
 
     mutex.lock();
     com_Bluetooth->flush();

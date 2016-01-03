@@ -22,7 +22,8 @@
 #define HUMI_BORD_ADDR     0x07
 
 #define ACTORSTOP              0x00
-#define FEEDING                    0xd8
+#define FEEDING                    0x58
+#define FEEDED                      0xd8
 #define CIRCULATING          0xf8
 
 #define TEMPCTRL_1           0x81
@@ -60,7 +61,7 @@ struct RealtimeCmd
         temp_limit_low=0;
         humi_limit_high=0;
         humi_limit_low=0;
-        state=0;
+        state=5;
     }
 };
 

@@ -73,7 +73,6 @@ void Screen::writeScreenData()
      writeBuff.clear();
     this->msleep(50);
 }
-
 RealtimeCmd Screen::resolveCmd(QByteArray & buff)
 {
     RealtimeCmd cmd;
